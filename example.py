@@ -1,8 +1,9 @@
 import threading
 
-import robotthreadlogger as logger
+from robotthreadlogger import BackgroundLogger
 
 
+logger = BackgroundLogger()
 threads = []
 
 
