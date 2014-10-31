@@ -51,14 +51,10 @@ class BackgroundLogger(Logger):
         with self.lock:
             thread = threading.currentThread().getName()
             if thread in self.LOGGING_THREADS:
-                logger.write(msg, level, html)
+                Logger.write(self, msg, level, html)
             else:
                 message = BackgroundMessage(msg, level, html)
                 self._messages.setdefault(thread, []).append(message)
-
-    def reset_background_messages(self):
-        with self.lock:
-            self._messages.clear()
 
     def log_background_messages(self):
         with self.lock:
@@ -68,17 +64,21 @@ class BackgroundLogger(Logger):
                     print message.format()
             self.reset_background_messages()
 
+    def reset_background_messages(self):
+        with self.lock:
+            self._messages.clear()
+
 
 class BackgroundMessage(object):
 
-    def __init__(self, message, level='INFO', html=False, timestamp=None):
+    def __init__(self, message, level='INFO', html=False):
         self.message = message
         self.level = level.upper()
         self.html = html
-        self.timestamp = timestamp or int(round(time.time() * 1000))
+        self.timestamp = time.time() * 1000
 
     def format(self):
         # Can support HTML logging only with INFO level.
         html = self.html and self.level == 'INFO'
         level = self.level if not html else 'HTML'
-        return "*%s:%d* %s" % (level, self.timestamp, self.message)
+        return "*%s:%d* %s" % (level, round(self.timestamp), self.message)
