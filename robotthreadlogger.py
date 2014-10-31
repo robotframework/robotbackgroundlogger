@@ -14,7 +14,9 @@
 
 try:
     from collections import OrderedDict
-except ImportError:  # New in 2.7.
+except ImportError:
+    # OrderedDict is wew in 2.7. Should we use 2.4 compatible recipe available
+    # at http://code.activestate.com/recipes/576693/?
     OrderedDict = dict
 import threading
 import time
@@ -22,34 +24,35 @@ import time
 from robot.api import logger
 
 
+LOGGING_THREADS = logger.librarylogger.LOGGING_THREADS
 MESSAGE_QUEUE = OrderedDict()
 LOCK = threading.RLock()
 
 
 def trace(msg, html=False):
-    write('trace', msg, html)
+    write(msg, 'TRACE', html)
 
 
 def debug(msg, html=False):
-    write('debug', msg, html)
+    write(msg, 'DEBUG', html)
 
 
 def info(msg, html=False):
-    write('info', msg, html)
+    write(msg, 'INFO', html)
 
 
 def warn(msg, html=False):
-    write('warn', msg, html)
+    write(msg, 'WARN', html)
 
 
-def write(level, msg, html=False):
+def write(msg, level, html=False):
     with LOCK:
         thread = threading.currentThread()
-        if thread.getName() in logger.librarylogger.LOGGING_THREADS:
+        if thread.getName() in LOGGING_THREADS:
             logger.write(msg, level, html)
         else:
-            MESSAGE_QUEUE.setdefault(thread.name, []).append((round(time.time() * 1000),
-                                                               level, msg, html))
+            message = Message(msg, level, html)
+            MESSAGE_QUEUE.setdefault(thread.getName(), []).append(message)
 
 
 def reset_background_messages():
@@ -61,5 +64,20 @@ def log_background_messages():
     with LOCK:
         for thread in MESSAGE_QUEUE:
             print "*HTML* <b>Messages from thread %s</b>" % thread
-            for timestamp, level, msg, html in MESSAGE_QUEUE[thread]:
-                print "*%s:%d* %s" % (level.upper(), timestamp, msg)
+            for message in MESSAGE_QUEUE[thread]:
+                print message.format()
+
+
+class Message(object):
+
+    def __init__(self, message, level='INFO', html=False, timestamp=None):
+        self.message = message
+        self.level = level.upper()
+        self.html = html
+        self.timestamp = timestamp or int(round(time.time() * 1000))
+
+    def format(self):
+        # Can only support HTML logging with INFO level.
+        html = self.html and self.level == 'INFO'
+        level = self.level if not html else 'HTML'
+        return "*%s:%d* %s" % (level, self.timestamp, self.message)
