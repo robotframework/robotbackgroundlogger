@@ -63,9 +63,10 @@ class BackgroundLogger(Logger):
     def log_background_messages(self):
         with self.lock:
             for thread in self._messages:
-                print "*HTML* <b>Messages from thread %s</b>" % thread
+                print "*HTML* <b>Messages from thread '%s'</b>" % thread
                 for message in self._messages[thread]:
                     print message.format()
+            self.reset_background_messages()
 
 
 class BackgroundMessage(object):

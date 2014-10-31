@@ -1,14 +1,15 @@
 import threading
 
-from robotthreadlogger import BackgroundLogger
+from robotbackgroundlogger import BackgroundLogger
 
 
 logger = BackgroundLogger()
 threads = []
 
 
-def on_thread(message, name=None):
-    thread = threading.Thread(target=logger.info, args=[message], name=name)
+def on_thread(message, level='INFO', html=False, name=None):
+    thread = threading.Thread(target=logger.write, args=[message, level, html],
+                              name=name)
     thread.start()
     threads.append(thread)
 
