@@ -2,7 +2,7 @@
 Library    example.py
 
 *** Test Cases ***
-X
+Example
     On Thread    Hello, world!
     On Thread    Hi, again!!    name=second
     On Thread    3
