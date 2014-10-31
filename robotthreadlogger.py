@@ -14,9 +14,7 @@
 
 try:
     from collections import OrderedDict
-except ImportError:
-    # OrderedDict is wew in 2.7. Should we use 2.4 compatible recipe available
-    # at http://code.activestate.com/recipes/576693/?
+except ImportError:  # New in 2.7 but 2.4 compatible recipe would be available.
     OrderedDict = dict
 import threading
 import time
@@ -24,51 +22,53 @@ import time
 from robot.api import logger
 
 
-LOGGING_THREADS = logger.librarylogger.LOGGING_THREADS
-MESSAGE_QUEUE = OrderedDict()
-LOCK = threading.RLock()
+class Logger(object):
+
+    def trace(self, msg, html=False):
+        self.write(msg, 'TRACE', html)
+
+    def debug(self, msg, html=False):
+        self.write(msg, 'DEBUG', html)
+
+    def info(self, msg, html=False):
+        self.write(msg, 'INFO', html)
+
+    def warn(self, msg, html=False):
+        self.write(msg, 'WARN', html)
+
+    def write(self, msg, level, html=False):
+        logger.write(msg, level, html)
 
 
-def trace(msg, html=False):
-    write(msg, 'TRACE', html)
+class BackgroundLogger(Logger):
+    LOGGING_THREADS = logger.librarylogger.LOGGING_THREADS
+
+    def __init__(self):
+        self.lock = threading.RLock()
+        self._messages = OrderedDict()
+
+    def write(self, msg, level, html=False):
+        with self.lock:
+            thread = threading.currentThread().getName()
+            if thread in self.LOGGING_THREADS:
+                logger.write(msg, level, html)
+            else:
+                message = BackgroundMessage(msg, level, html)
+                self._messages.setdefault(thread, []).append(message)
+
+    def reset_background_messages(self):
+        with self.lock:
+            self._messages.clear()
+
+    def log_background_messages(self):
+        with self.lock:
+            for thread in self._messages:
+                print "*HTML* <b>Messages from thread %s</b>" % thread
+                for message in self._messages[thread]:
+                    print message.format()
 
 
-def debug(msg, html=False):
-    write(msg, 'DEBUG', html)
-
-
-def info(msg, html=False):
-    write(msg, 'INFO', html)
-
-
-def warn(msg, html=False):
-    write(msg, 'WARN', html)
-
-
-def write(msg, level, html=False):
-    with LOCK:
-        thread = threading.currentThread()
-        if thread.getName() in LOGGING_THREADS:
-            logger.write(msg, level, html)
-        else:
-            message = Message(msg, level, html)
-            MESSAGE_QUEUE.setdefault(thread.getName(), []).append(message)
-
-
-def reset_background_messages():
-    with LOCK:
-        MESSAGE_QUEUE.clear()
-
-
-def log_background_messages():
-    with LOCK:
-        for thread in MESSAGE_QUEUE:
-            print "*HTML* <b>Messages from thread %s</b>" % thread
-            for message in MESSAGE_QUEUE[thread]:
-                print message.format()
-
-
-class Message(object):
+class BackgroundMessage(object):
 
     def __init__(self, message, level='INFO', html=False, timestamp=None):
         self.message = message
@@ -77,7 +77,7 @@ class Message(object):
         self.timestamp = timestamp or int(round(time.time() * 1000))
 
     def format(self):
-        # Can only support HTML logging with INFO level.
+        # Can support HTML logging only with INFO level.
         html = self.html and self.level == 'INFO'
         level = self.level if not html else 'HTML'
         return "*%s:%d* %s" % (level, self.timestamp, self.message)
