@@ -80,9 +80,12 @@ class BackgroundLogger(Logger):
             for message in self._messages.pop(thread):
                 print message.format()
 
-    def reset_background_messages(self):
+    def reset_background_messages(self, name=None):
         with self.lock:
-            self._messages.clear()
+            if name:
+                self._messages.pop(name)
+            else:
+                self._messages.clear()
 
 
 class BackgroundMessage(object):
