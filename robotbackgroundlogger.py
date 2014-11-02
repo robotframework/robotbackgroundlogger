@@ -56,13 +56,29 @@ class BackgroundLogger(Logger):
                 message = BackgroundMessage(msg, level, html)
                 self._messages.setdefault(thread, []).append(message)
 
-    def log_background_messages(self):
+    def log_background_messages(self, name=None):
+        """Forwards messages logged on background to Robot Framework log.
+
+        By default forwards all messages logged by all threads, but can be
+        limited to a certain thread by passing thread's name as an argument.
+
+        Logged messages are removed from the message storage.
+        """
         with self.lock:
-            for thread in self._messages:
-                print "*HTML* <b>Messages from thread '%s'</b>" % thread
-                for message in self._messages[thread]:
-                    print message.format()
-            self.reset_background_messages()
+            if name:
+                self._log_messages_by_thread(name)
+            else:
+                self._log_all_messages()
+
+    def _log_messages_by_thread(self, name):
+        for message in self._messages.pop(name, []):
+            print message.format()
+
+    def _log_all_messages(self):
+        for thread in self._messages:
+            print "*HTML* <b>Messages by '%s'</b>" % thread
+            for message in self._messages.pop(thread):
+                print message.format()
 
     def reset_background_messages(self):
         with self.lock:
