@@ -1,5 +1,5 @@
-Logging from threads support to test libraries
-==============================================
+Background logging support to test libraries
+============================================
 
 This helper module is indented to be used by Robot Framework test libraries
 that run keywords in background using threads and that want those threads
