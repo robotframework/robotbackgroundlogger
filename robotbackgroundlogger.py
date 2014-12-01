@@ -75,7 +75,7 @@ class BackgroundLogger(Logger):
             print message.format()
 
     def _log_all_messages(self):
-        for thread in self._messages:
+        for thread in list(self._messages):
             print "*HTML* <b>Messages by '%s'</b>" % thread
             for message in self._messages.pop(thread):
                 print message.format()
