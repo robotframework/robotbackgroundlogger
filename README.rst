@@ -69,12 +69,3 @@ Example
 module can be used in practice. You can run the example like::
 
     pybot example.robot
-
-ToDo
-----
-
-- Check compatibility with ``robot.api.logger`` (console, HTML logging, ...).
-- Document that libraries should only create one ``BackgroundLogger`` instance
-  unless they want to use ``log_background_messages`` multiple times too.
-- Review and enhance docs and examples in general.
-- 0.1 release.
