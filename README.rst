@@ -17,6 +17,8 @@ messages to Robot Framework's log.
 This class is available since Robot Framework 2.8.7 as ``robot.api.logger.BackgroundLogger``.
 This project can still be used for backwards compatibility with older Robot Framework versions.
 
+Robot Background Logger can be found from PYPI__
+
 __ http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#communication-when-using-threads
 __ https://robot-framework.readthedocs.org/en/latest/autodoc/robot.api.html#module-robot.api.logger
 
