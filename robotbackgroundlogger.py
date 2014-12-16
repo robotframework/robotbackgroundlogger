@@ -22,7 +22,9 @@ import time
 from robot.api import logger
 
 
-class Logger(object):
+class BaseLogger(object):
+    """Base class for custom loggers with same api as ``robot.api.logger``.
+    """
 
     def trace(self, msg, html=False):
         self.write(msg, 'TRACE', html)
@@ -30,17 +32,37 @@ class Logger(object):
     def debug(self, msg, html=False):
         self.write(msg, 'DEBUG', html)
 
-    def info(self, msg, html=False):
+    def info(self, msg, html=False, also_to_console=False):
         self.write(msg, 'INFO', html)
+        if also_to_console:
+            self.console(msg)
 
     def warn(self, msg, html=False):
         self.write(msg, 'WARN', html)
 
+    def console(self, msg, newline=True, stream='stdout'):
+        logger.console(msg, newline, stream)
+
     def write(self, msg, level, html=False):
-        logger.write(msg, level, html)
+        raise NotImplementedError
 
 
-class BackgroundLogger(Logger):
+class BackgroundLogger(BaseLogger):
+    """A logger which can be used from multiple threads. The messages from main
+    thread will go to robot logging api (or Python logging if Robot is not running).
+    Messages from other threads are saved to memory and can be later logged with
+    ``log_background_messages()``. This will also remove the messages from memory.
+
+    Example::
+
+        from robotbackgroundlogger import BackgroundLogger
+        logger = BackgroundLogger()
+
+    After that logger can be used mostly like ``robot.api.logger`::
+
+        logger.debug('Hello, world!')
+        logger.info('<b>HTML</b> example', html=True)
+    """
     LOGGING_THREADS = logger.librarylogger.LOGGING_THREADS
 
     def __init__(self):
@@ -51,9 +73,9 @@ class BackgroundLogger(Logger):
         with self.lock:
             thread = threading.currentThread().getName()
             if thread in self.LOGGING_THREADS:
-                Logger.write(self, msg, level, html)
+                logger.write(msg, level, html)
             else:
-                message = BackgroundMessage(msg, level, html)
+                message = _BackgroundMessage(msg, level, html)
                 self._messages.setdefault(thread, []).append(message)
 
     def log_background_messages(self, name=None):
@@ -61,9 +83,13 @@ class BackgroundLogger(Logger):
 
         By default forwards all messages logged by all threads, but can be
         limited to a certain thread by passing thread's name as an argument.
+        This method must be called from the main thread.
 
         Logged messages are removed from the message storage.
         """
+        thread = threading.currentThread().getName()
+        if thread not in self.LOGGING_THREADS:
+            raise RuntimeError("Logging background messages is only allowed from main thread. Current thread name: %s" % thread)
         with self.lock:
             if name:
                 self._log_messages_by_thread(name)
@@ -76,6 +102,7 @@ class BackgroundLogger(Logger):
 
     def _log_all_messages(self):
         for thread in list(self._messages):
+            # Only way to get custom timestamps currently is with print
             print "*HTML* <b>Messages by '%s'</b>" % thread
             for message in self._messages.pop(thread):
                 print message.format()
@@ -88,7 +115,7 @@ class BackgroundLogger(Logger):
                 self._messages.clear()
 
 
-class BackgroundMessage(object):
+class _BackgroundMessage(object):
 
     def __init__(self, message, level='INFO', html=False):
         self.message = message
