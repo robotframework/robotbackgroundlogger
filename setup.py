@@ -26,7 +26,7 @@ setup(
     url              = 'https://github.com/robotframework/robotbackgroundlogger',
     download_url     = 'https://pypi.python.org/pypi/robotbackgroundlogger',
     license          = 'Apache License 2.0',
-    description      = 'A tool for logging to Robot Framework log '
+    description      = 'A helper module for logging to Robot Framework log '
                        'from background threads.',
     long_description = README,
     keywords         = 'robotframework testing testautomation atdd',
