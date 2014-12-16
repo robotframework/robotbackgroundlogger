@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from __future__ import with_statement
+
 try:
     from collections import OrderedDict
 except ImportError:  # New in 2.7 but 2.4 compatible recipe would be available.
@@ -21,6 +23,7 @@ import time
 
 from robot.api import logger
 
+__version__ = "1.0"
 
 class BaseLogger(object):
     """Base class for custom loggers with same api as ``robot.api.logger``.

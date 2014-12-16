@@ -10,7 +10,7 @@ threads = {}
 def log_on_thread(message, level='INFO', html=False, name=None):
     thread = Thread(name=name, target=logger.write, args=[message, level, html])
     thread.start()
-    threads[thread.name] = thread
+    threads[thread.getName()] = thread
 
 
 def log_on_threads(message, name_prefix, count):
@@ -20,7 +20,7 @@ def log_on_threads(message, name_prefix, count):
                         args=['%s says <i>%s</i>.' % (name, message)],
                         kwargs={'html': True})
         thread.start()
-        threads[thread.name] = thread
+        threads[thread.getName()] = thread
 
 
 def finish_all():
