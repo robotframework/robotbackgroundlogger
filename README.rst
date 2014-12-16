@@ -65,7 +65,10 @@ possible to do that also without logging:
 Example
 -------
 
-`<example.py>`__ library that is used by `<example.robot>`__ shows how this
+`example.py`__ library that is used by `example.robot`__ shows how this
 module can be used in practice. You can run the example like::
 
     pybot example.robot
+
+__ https://github.com/robotframework/robotbackgroundlogger/blob/master/example.py
+__ https://github.com/robotframework/robotbackgroundlogger/blob/master/example.robot
