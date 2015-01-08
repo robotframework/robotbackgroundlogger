@@ -14,9 +14,6 @@ This module provides a custom logger that works mostly like the standard
 It also provides a method the main thread can use to forward the logged
 messages to Robot Framework's log.
 
-This class is available since Robot Framework 2.8.7 as ``robot.api.logger.BackgroundLogger``.
-This project can still be used for backwards compatibility with older Robot Framework versions.
-
 Robot Background Logger is hosted in `Github`__ and downloads can be found from `PYPI`__. 
 Installation can be done with pip::
 
