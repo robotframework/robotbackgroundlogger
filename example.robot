@@ -6,7 +6,7 @@ Start threads separately, log all at the end
     Log On Thread    Hello, world!
     Log On Thread    Hi, again!!    name=second
     Log On Thread    3
-    Log On Thread    4
+    Log On Thread    4    ERROR
     Log On Thread    5
     Log On Thread    6    DEBUG
     Log On Thread    7    info
