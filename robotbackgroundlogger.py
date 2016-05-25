@@ -25,6 +25,7 @@ from robot.api import logger
 
 __version__ = '1.1'
 
+
 class BaseLogger(object):
     """Base class for custom loggers with same api as ``robot.api.logger``.
     """
@@ -34,6 +35,9 @@ class BaseLogger(object):
 
     def debug(self, msg, html=False):
         self.write(msg, 'DEBUG', html)
+
+    def error(self, msg, html=False):
+        self.write(msg, 'ERROR', html)
 
     def info(self, msg, html=False, also_to_console=False):
         self.write(msg, 'INFO', html)
@@ -51,10 +55,12 @@ class BaseLogger(object):
 
 
 class BackgroundLogger(BaseLogger):
-    """A logger which can be used from multiple threads. The messages from main
-    thread will go to robot logging api (or Python logging if Robot is not running).
-    Messages from other threads are saved to memory and can be later logged with
-    ``log_background_messages()``. This will also remove the messages from memory.
+    """A logger which can be used from multiple threads.
+
+    The messages from main thread will go to robot logging api (or Python
+    logging if Robot is not running). Messages from other threads are saved
+    to memory and can be later logged with ``log_background_messages()``.
+    This will also remove the messages from memory.
 
     Example::
 
@@ -92,7 +98,9 @@ class BackgroundLogger(BaseLogger):
         """
         thread = threading.currentThread().getName()
         if thread not in self.LOGGING_THREADS:
-            raise RuntimeError("Logging background messages is only allowed from main thread. Current thread name: %s" % thread)
+            raise RuntimeError(
+                "Logging background messages is only allowed from main"
+                " thread. Current thread name: %s" % thread)
         with self.lock:
             if name:
                 self._log_messages_by_thread(name)
