@@ -27,8 +27,7 @@ __version__ = '1.1'
 
 
 class BaseLogger(object):
-    """Base class for custom loggers with same api as ``robot.api.logger``.
-    """
+    """Base class for custom loggers with same api as ``robot.api.logger``."""
 
     def trace(self, msg, html=False):
         self.write(msg, 'TRACE', html)
@@ -84,7 +83,7 @@ class BackgroundLogger(BaseLogger):
             if thread in self.LOGGING_THREADS:
                 logger.write(msg, level, html)
             else:
-                message = _BackgroundMessage(msg, level, html)
+                message = BackgroundMessage(msg, level, html)
                 self._messages.setdefault(thread, []).append(message)
 
     def log_background_messages(self, name=None):
@@ -92,15 +91,15 @@ class BackgroundLogger(BaseLogger):
 
         By default forwards all messages logged by all threads, but can be
         limited to a certain thread by passing thread's name as an argument.
-        This method must be called from the main thread.
-
         Logged messages are removed from the message storage.
+
+        This method must be called from the main thread.
         """
         thread = threading.currentThread().getName()
         if thread not in self.LOGGING_THREADS:
             raise RuntimeError(
-                "Logging background messages is only allowed from main"
-                " thread. Current thread name: %s" % thread)
+                "Logging background messages is only allowed from the main "
+                "thread. Current thread name: %s" % thread)
         with self.lock:
             if name:
                 self._log_messages_by_thread(name)
@@ -126,7 +125,7 @@ class BackgroundLogger(BaseLogger):
                 self._messages.clear()
 
 
-class _BackgroundMessage(object):
+class BackgroundMessage(object):
 
     def __init__(self, message, level='INFO', html=False):
         self.message = message
