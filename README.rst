@@ -14,10 +14,12 @@ This module provides a custom logger that works mostly like the standard
 It also provides a method the main thread can use to forward the logged
 messages to Robot Framework's log.
 
-Robot Background Logger is hosted in `Github`__ and downloads can be found from `PYPI`__. 
-Installation can be done with pip::
+Robot Background Logger is hosted in `Github`__ and downloads can be found
+from `PYPI`__. Installation is easiest done with pip::
 
     pip install robotbackgroundlogger
+
+Starting from version 1.2 this module support both Python 2 and Python 3.
 
 __ http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#communication-when-using-threads
 __ https://robot-framework.readthedocs.org/en/latest/autodoc/robot.api.html#module-robot.api.logger
