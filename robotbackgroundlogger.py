@@ -24,7 +24,7 @@ import time
 
 from robot.api import logger
 
-__version__ = '1.2'
+__version__ = '1.3dev'
 
 
 class BaseLogger(object):
