@@ -1,4 +1,5 @@
-#  Copyright 2014 Nokia Siemens Networks Oyj
+#  Copyright 2014-2015 Nokia Networks
+#  Copyright 2016- Robot Framework Foundation
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -16,7 +17,7 @@ from __future__ import print_function, with_statement
 
 try:
     from collections import OrderedDict
-except ImportError:  # New in 2.7 but 2.4 compatible recipe would be available.
+except ImportError:  # New in Python 2.7
     OrderedDict = dict
 import threading
 import time
