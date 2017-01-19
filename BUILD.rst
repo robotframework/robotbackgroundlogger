@@ -25,10 +25,10 @@ Releasing RobotBackgroundLogger
 
     pip install robotbackgroundlogger --upgrade
 
-7. ``__version__`` back to devel::
+7. ``__version__`` back to dev (e.g. `1.3dev`)::
 
     git diff  # verify changes
-    git commit -m "__version__ back to devel" robotbackgroundlogger.py && git push
+    git commit -m "__version__ back to dev" robotbackgroundlogger.py && git push
 
 8. Advertise on `Twitter <https://twitter.com/robotframework>`__ and on mailing
    lists as needed.
