@@ -51,7 +51,7 @@ internally. They can be later logged by the main thread by running:
 
     logger.log_background_messages()
 
-If you want to log only messages logged by a certain thread, you can use
+If you want to log only messages logged by a certain thread, you can
 pass the name of the thread as an argument:
 
 .. sourcecode:: python
