@@ -76,14 +76,20 @@ class BackgroundLogger(BaseLogger):
     """
     LOGGING_THREADS = logger.librarylogger.LOGGING_THREADS
 
-    def __new__(cls):
-        if not hasattr(cls, 'instance'):
-            cls.instance = super(BackgroundLogger, cls).__new__(cls)
-        return cls.instance
-
     def __init__(self):
         self.lock = threading.RLock()
         self._messages = OrderedDict()
+
+    @classmethod
+    def get_instance(cls):
+        """
+        This is used when you want to use same _messages queue for one thread,
+        since _message queue is not shared by backgoundloggers.
+        :return: object instance
+        """
+        if not hasattr(cls, 'instance'):
+            cls.instance = BackgroundLogger()
+        return cls.instance
 
     def write(self, msg, level, html=False):
         with self.lock:
