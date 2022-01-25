@@ -39,9 +39,9 @@ class BaseLogger(object):
     def error(self, msg, html=False):
         self.write(msg, 'ERROR', html)
 
-    def info(self, msg, html=False, also_to_console=False):
+    def info(self, msg, html=False, also_console=False):
         self.write(msg, 'INFO', html)
-        if also_to_console:
+        if also_console:
             self.console(msg)
 
     def warn(self, msg, html=False):
