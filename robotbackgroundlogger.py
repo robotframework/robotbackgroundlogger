@@ -23,8 +23,10 @@ import threading
 import time
 
 from robot.api import logger
+from robot.output.logger import LOGGER
+from robot.output.loggerhelper import Message
 
-__version__ = '1.3dev'
+__version__ = '1.4dev'
 
 
 class BaseLogger(object):
@@ -78,13 +80,24 @@ class BackgroundLogger(BaseLogger):
         self.lock = threading.RLock()
         self._messages = OrderedDict()
 
+    @classmethod
+    def get_instance(cls):
+        """
+        This is used when you want to use same _messages queue for one thread,
+        since _message queue is not shared by backgoundloggers.
+        :return: object instance
+        """
+        if not hasattr(cls, 'instance'):
+            cls.instance = BackgroundLogger()
+        return cls.instance
+
     def write(self, msg, level, html=False):
         with self.lock:
             thread = threading.currentThread().getName()
             if thread in self.LOGGING_THREADS:
-                logger.write(msg, level, html)
+                LOGGER.log_message(Message(msg, level, html))
             else:
-                message = BackgroundMessage(msg, level, html)
+                message = Message(msg, level, html)
                 self._messages.setdefault(thread, []).append(message)
 
     def log_background_messages(self, name=None):
@@ -107,16 +120,18 @@ class BackgroundLogger(BaseLogger):
             else:
                 self._log_all_messages()
 
-    def _log_messages_by_thread(self, name):
+    def _log_messages_by_thread(self, name, html=False):
+        msg = 'Run Thread %s' % name
+        LOGGER.log_message(Message(msg, 'INFO', html))
         for message in self._messages.pop(name, []):
-            print(message.format())
+            LOGGER.log_message(message)
 
     def _log_all_messages(self):
         for thread in list(self._messages):
             # Only way to get custom timestamps currently is with print
             print("*HTML* <b>Messages by '%s'</b>" % thread)
             for message in self._messages.pop(thread):
-                print(message.format())
+                LOGGER.log_message(message)
 
     def reset_background_messages(self, name=None):
         with self.lock:
@@ -124,18 +139,3 @@ class BackgroundLogger(BaseLogger):
                 self._messages.pop(name)
             else:
                 self._messages.clear()
-
-
-class BackgroundMessage(object):
-
-    def __init__(self, message, level='INFO', html=False):
-        self.message = message
-        self.level = level.upper()
-        self.html = html
-        self.timestamp = time.time() * 1000
-
-    def format(self):
-        # Can support HTML logging only with INFO level.
-        html = self.html and self.level == 'INFO'
-        level = self.level if not html else 'HTML'
-        return "*%s:%d* %s" % (level, round(self.timestamp), self.message)
