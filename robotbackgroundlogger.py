@@ -26,7 +26,6 @@ from robot.api import logger
 
 __version__ = '1.3dev'
 
-
 class BaseLogger(object):
     """Base class for custom loggers with same api as ``robot.api.logger``."""
 
@@ -80,12 +79,12 @@ class BackgroundLogger(BaseLogger):
 
     def write(self, msg, level, html=False):
         with self.lock:
-            thread = threading.currentThread().getName()
-            if thread in self.LOGGING_THREADS:
+            thread_name = current_thread_name()
+            if thread_name in self.LOGGING_THREADS:
                 logger.write(msg, level, html)
             else:
                 message = BackgroundMessage(msg, level, html)
-                self._messages.setdefault(thread, []).append(message)
+                self._messages.setdefault(thread_name, []).append(message)
 
     def log_background_messages(self, name=None):
         """Forwards messages logged on background to Robot Framework log.
@@ -96,16 +95,24 @@ class BackgroundLogger(BaseLogger):
 
         This method must be called from the main thread.
         """
-        thread = threading.currentThread().getName()
-        if thread not in self.LOGGING_THREADS:
+        thread_name = current_thread_name()
+        if thread_name not in self.LOGGING_THREADS:
             raise RuntimeError(
                 "Logging background messages is only allowed from the main "
-                "thread. Current thread name: %s" % thread)
+                "thread. Current thread name: %s" % thread_name)
         with self.lock:
             if name:
                 self._log_messages_by_thread(name)
             else:
                 self._log_all_messages()
+
+    def current_thread_name():
+        if hasattr(threading, 'current_thread'):
+            # Changed in version 2.6: Added current_thread() and name property.
+            return threading.current_thread().name
+        else:
+            # This gives warnings in more recent versions of Python
+            return threading.currentThread().getName()
 
     def _log_messages_by_thread(self, name):
         for message in self._messages.pop(name, []):
